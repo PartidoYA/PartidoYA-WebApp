@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
 import { CourtResponse, CourtService, ReservationResponse } from '../../shared/services/court.service';
 import { MapsLoaderService } from '../../shared/services/maps-loader.service';
+import { OpenMapService } from '../../shared/services/open-map.service';
 import { PaymentService } from '../../shared/services/payment.service';
 
 @Component({
@@ -39,6 +40,7 @@ export class CanchaDetailComponent implements OnInit, AfterViewInit {
     private authService: AuthService,
     private paymentService: PaymentService,
     private mapsLoader: MapsLoaderService,
+    private openMap: OpenMapService,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -201,8 +203,14 @@ export class CanchaDetailComponent implements OnInit, AfterViewInit {
       map.setCenter(center);
       this.mapLoading = false;
     } catch {
+      this.openMap.renderLocation(
+        this.mapContainer.nativeElement,
+        this.court.latitude,
+        this.court.longitude,
+        this.court.name
+      );
       this.mapLoading = false;
-      this.mapError = 'No se pudo cargar el mapa.';
+      this.mapError = '';
     }
     this.cdr.detectChanges();
   }

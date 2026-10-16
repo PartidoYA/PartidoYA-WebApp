@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: partidoya-api-20232545
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JDBC_DATABASE_URL
+        sync: false
+      - key: DATABASE_USER
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://partidoya-web-20232545.onrender.com
+      - key: CORS_ALLOWED_ORIGIN_PATTERNS
+        value: https://*.onrender.com
+
+  - type: web
+    name: partidoya-web-20232545
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist/frontend/browser
+    envVars:
+      - key: API_URL
+        value: https://partidoya-api-20232545.onrender.com/api/v1
+      - key: GOOGLE_MAPS_API_KEY
+        value: ""
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

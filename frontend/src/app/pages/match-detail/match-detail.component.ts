@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { MatchService, MatchResponse, PlayerJoinRequestResponse } from '../../shared/services/match.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { MapsLoaderService } from '../../shared/services/maps-loader.service';
+import { OpenMapService } from '../../shared/services/open-map.service';
 import { GeolocationService } from '../../shared/services/geolocation.service';
 import { environment } from '../../../environments/environment';
 import { NotificationService } from '../../shared/services/notification.service';
@@ -49,6 +50,7 @@ export class MatchDetailComponent implements OnInit {
     private matchService: MatchService,
     private authService: AuthService,
     private mapsLoader: MapsLoaderService,
+    private openMap: OpenMapService,
     private geolocation: GeolocationService,
     private notificationService: NotificationService,
     private route: ActivatedRoute,
@@ -125,8 +127,38 @@ export class MatchDetailComponent implements OnInit {
       const position = await this.geolocation.getPosition();
       this.renderDirections(position);
     } catch (err: any) {
+      await this.renderOpenMapFallback(err);
+    }
+  }
+
+  private async renderOpenMapFallback(originalError: unknown): Promise<void> {
+    if (!this.match || !this.mapContainer) {
       this.mapLoading = false;
-      this.mapError = err?.message || 'No se pudo cargar el mapa.';
+      return;
+    }
+    if (this.match.latitude === null || this.match.longitude === null) {
+      this.mapLoading = false;
+      this.mapError = 'No hay coordenadas guardadas. Usa “Abrir en Google Maps” para ver la ruta.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    try {
+      const position = await this.geolocation.getPosition();
+      const summary = this.openMap.renderDirectRoute(
+        this.mapContainer.nativeElement,
+        [position.coords.latitude, position.coords.longitude],
+        [this.match.latitude, this.match.longitude]
+      );
+      this.routeDuration = summary.duration;
+      this.routeDistance = summary.distance;
+      this.mapError = '';
+    } catch {
+      this.mapError = originalError instanceof Error
+        ? originalError.message
+        : 'No se pudo cargar el mapa.';
+    } finally {
+      this.mapLoading = false;
       this.cdr.detectChanges();
     }
   }

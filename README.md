@@ -2,8 +2,6 @@
 
 Plataforma web para organizar y unirse a partidos deportivos casuales (fútbol, básquet, vóley, tenis), con reserva de canchas y pagos integrados.
 
-**Demo en producción:** [partidoya.pro](https://partidoya.pro)
-
 ## Arquitectura
 
 Backend en Java/Spring Boot siguiendo Domain-Driven Design, organizado en bounded contexts:
@@ -29,11 +27,11 @@ Frontend en Angular (standalone components), consumiendo la API REST vía HTTPS/
 **Frontend**
 - Angular (esbuild `@angular/build:application`)
 - TypeScript, SCSS
-- Google Maps JavaScript API (autocompletado de direcciones, rutas y geolocalización)
+- Google Maps JavaScript API opcional; OpenStreetMap funciona como respaldo sin clave
 
 **Infraestructura**
-- Backend + MySQL desplegados en Railway
-- Frontend desplegado en Vercel
+- Backend y frontend desplegables en Render mediante `render.yaml`
+- MySQL administrado en Aiven
 - Pagos vía Culqi
 
 ## Funcionalidades principales
@@ -66,16 +64,24 @@ ng serve
 
 - App: `http://localhost:4200`
 
-## Despliegue en Railway
+## Despliegue con Aiven y Render
 
-El backend usa el perfil `prod`, Flyway y una base MySQL. Configura estas variables en el servicio:
+1. Crea un servicio gratuito de Aiven for MySQL y copia host, puerto, usuario y contraseña.
+2. En Render, crea un Blueprint desde este repositorio. `render.yaml` define el backend Docker y el frontend estático.
+3. Completa las variables secretas del backend:
 
 - `SPRING_PROFILES_ACTIVE=prod`
-- `JDBC_DATABASE_URL=jdbc:mysql://HOST:PUERTO/BASE?...`
+- `JDBC_DATABASE_URL=jdbc:mysql://HOST:PUERTO/defaultdb?sslMode=REQUIRED&serverTimezone=UTC`
 - `DATABASE_USER` y `DATABASE_PASSWORD`
 - `JWT_SECRET` con al menos 32 caracteres aleatorios
 - `CORS_ALLOWED_ORIGINS` con el dominio exacto del frontend
 
-Railway comprueba el despliegue mediante `/actuator/health`. En el frontend, `API_URL` y
-`GOOGLE_MAPS_API_KEY` se inyectan durante `npm run build`; la clave de Maps debe estar restringida
-por referente HTTP y únicamente a las APIs que utiliza la aplicación.
+Render comprueba el backend mediante `/actuator/health`. Flyway crea y valida el esquema al iniciar.
+En el frontend, `API_URL` y `GOOGLE_MAPS_API_KEY` se inyectan durante `npm run build`. La clave de
+Maps es opcional: sin ella, las vistas de ubicación usan OpenStreetMap y la dirección se puede
+ingresar manualmente. Si se configura una clave, debe restringirse por referente HTTP y a Maps
+JavaScript API, Places API y Directions API.
+
+La instancia web gratuita de Render se suspende tras un periodo sin tráfico y puede tardar cerca de
+un minuto en despertar. Aiven mantiene su servicio MySQL gratuito, pero no es una configuración de
+alta disponibilidad.
