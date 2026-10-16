@@ -43,9 +43,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResource> handleUnexpected(Exception ex) {
         log.error("Unexpected error handling request", ex);
-        var cause = ex.getCause();
-        var detail = "DEBUG_TEMP " + ex.getClass().getSimpleName() + ": " + ex.getMessage()
-                + (cause != null ? " | cause: " + cause.getClass().getSimpleName() + ": " + cause.getMessage() : "");
-        return new ResponseEntity<>(new ErrorResource("UNEXPECTED_ERROR", detail), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(
+                new ErrorResource("UNEXPECTED_ERROR", "Ocurrió un error inesperado. Inténtalo nuevamente."),
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

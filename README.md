@@ -65,3 +65,17 @@ ng serve
 ```
 
 - App: `http://localhost:4200`
+
+## Despliegue en Railway
+
+El backend usa el perfil `prod`, Flyway y una base MySQL. Configura estas variables en el servicio:
+
+- `SPRING_PROFILES_ACTIVE=prod`
+- `JDBC_DATABASE_URL=jdbc:mysql://HOST:PUERTO/BASE?...`
+- `DATABASE_USER` y `DATABASE_PASSWORD`
+- `JWT_SECRET` con al menos 32 caracteres aleatorios
+- `CORS_ALLOWED_ORIGINS` con el dominio exacto del frontend
+
+Railway comprueba el despliegue mediante `/actuator/health`. En el frontend, `API_URL` y
+`GOOGLE_MAPS_API_KEY` se inyectan durante `npm run build`; la clave de Maps debe estar restringida
+por referente HTTP y únicamente a las APIs que utiliza la aplicación.

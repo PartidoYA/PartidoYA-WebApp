@@ -1,8 +1,16 @@
 alter table users
-    add column status varchar(30) not null default 'ACTIVE',
-    add column suspension_reason varchar(300),
-    add column suspended_until date,
-    add column last_administrative_action_at datetime(6),
+    add column status varchar(30) not null default 'ACTIVE';
+
+alter table users
+    add column suspension_reason varchar(300);
+
+alter table users
+    add column suspended_until date;
+
+alter table users
+    add column last_administrative_action_at datetime(6);
+
+alter table users
     add column last_administrative_action_by bigint;
 
 create table if not exists user_administrative_actions (

@@ -17,6 +17,11 @@ export class MapsLoaderService {
     }
 
     this.loadPromise = new Promise((resolve, reject) => {
+      if (!environment.googleMapsApiKey) {
+        reject(new Error('Google Maps no está configurado.'));
+        return;
+      }
+
       if (window.google?.maps) {
         resolve();
         return;
@@ -33,9 +38,19 @@ export class MapsLoaderService {
       script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}&libraries=places&language=es&region=PE`;
       script.async = true;
       script.defer = true;
-      script.onload = () => resolve();
+      script.onload = () => {
+        if (window.google?.maps) {
+          resolve();
+          return;
+        }
+        reject(new Error('Google Maps respondió sin inicializar la API.'));
+      };
       script.onerror = () => reject(new Error('No se pudo cargar Google Maps.'));
       document.head.appendChild(script);
+    });
+
+    this.loadPromise.catch(() => {
+      this.loadPromise = null;
     });
 
     return this.loadPromise;
