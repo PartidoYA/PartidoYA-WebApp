@@ -35,8 +35,10 @@ create table if not exists sport_preferences (
 );
 
 create table if not exists profile_availability (
+    id bigint not null auto_increment,
     profile_id bigint not null,
     time_slot varchar(20),
+    primary key (id),
     constraint fk_profile_availability_profile foreign key (profile_id) references profiles (id)
 );
 
@@ -61,32 +63,42 @@ create table if not exists courts (
 );
 
 create table if not exists court_sports (
+    id bigint not null auto_increment,
     court_id bigint not null,
     sport varchar(80) not null,
+    primary key (id),
     constraint fk_court_sports_court foreign key (court_id) references courts (id)
 );
 
 create table if not exists court_schedules (
+    id bigint not null auto_increment,
     court_id bigint not null,
     schedule varchar(30) not null,
+    primary key (id),
     constraint fk_court_schedules_court foreign key (court_id) references courts (id)
 );
 
 create table if not exists court_images (
+    id bigint not null auto_increment,
     court_id bigint not null,
     image_url varchar(255),
+    primary key (id),
     constraint fk_court_images_court foreign key (court_id) references courts (id)
 );
 
 create table if not exists court_services (
+    id bigint not null auto_increment,
     court_id bigint not null,
     service varchar(100),
+    primary key (id),
     constraint fk_court_services_court foreign key (court_id) references courts (id)
 );
 
 create table if not exists court_features (
+    id bigint not null auto_increment,
     court_id bigint not null,
     feature varchar(100),
+    primary key (id),
     constraint fk_court_features_court foreign key (court_id) references courts (id)
 );
 
@@ -134,8 +146,10 @@ create table if not exists matches (
 );
 
 create table if not exists match_participants (
+    id bigint not null auto_increment,
     match_id bigint not null,
     user_id bigint,
+    primary key (id),
     constraint fk_match_participants_match foreign key (match_id) references matches (id)
 );
 
